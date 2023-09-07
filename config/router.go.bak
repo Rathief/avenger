@@ -1,0 +1,17 @@
+package config
+
+import (
+	"avenger/handler"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+func ConnectOrdersRouter(oh handler.OrderHandler) *httprouter.Router {
+	router := httprouter.New()
+	router.GET("/orders", oh.ReadOrders)
+	router.GET("/orders/:id", oh.ReadOrderByID)
+	router.POST("/orders", oh.CreateOrder)
+	router.PUT("/orders/:id", oh.UpdateOrderByID)
+	router.DELETE("/orders/:id", oh.DeleteOrderByID)
+	return router
+}

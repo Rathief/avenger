@@ -1,0 +1,67 @@
+package repo
+
+import "avenger/entity"
+
+func (dbh DBHandler) SelectAllOrders() ([]entity.Order, error) {
+	var o entity.Order
+	var sliceOfOrders []entity.Order
+	query := `
+	SELECT * FROM Orders;
+	`
+	rows, err := dbh.DB.QueryContext(dbh.Ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		rows.Scan(&o.ID, &o.CustomerName, &o.ProductName, &o.Quantity, &o.TotalPrice)
+		sliceOfOrders = append(sliceOfOrders, o)
+	}
+	return sliceOfOrders, nil
+}
+func (dbh DBHandler) SelectOrder(id string) (entity.Order, error) {
+	var o entity.Order
+	query := `
+	SELECT * FROM Orders WHERE ID = ?;
+	`
+	row := dbh.DB.QueryRowContext(dbh.Ctx, query, id)
+	err := row.Scan(&o.ID, &o.CustomerName, &o.ProductName, &o.Quantity, &o.TotalPrice)
+	if err != nil {
+		return entity.Order{}, err
+	}
+	return o, nil
+}
+func (dbh DBHandler) InsertOrder(o entity.OrderInput) error {
+	query := `
+	INSERT INTO Orders (CustomerName, ProductName, Quantity, TotalPrice)
+	VALUES (?, ?, ?, ?);
+	`
+	_, err := dbh.DB.ExecContext(dbh.Ctx, query, o.CustomerName, o.ProductName, o.Quantity, o.TotalPrice)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (dbh DBHandler) UpdateOrder(id string, o entity.OrderInput) error {
+	query := `
+	UPDATE Orders
+	SET CustomerName = ?, ProductName = ?, QUantity = ?, TotalPrice = ?
+	WHERE ID = ?
+	`
+
+	_, err := dbh.DB.ExecContext(dbh.Ctx, query, o.CustomerName, o.ProductName, o.Quantity, o.TotalPrice, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (dbh DBHandler) DeleteOrder(id string) error {
+	query := `
+	DELETE FROM Orders WHERE ID = ?
+	`
+
+	_, err := dbh.DB.ExecContext(dbh.Ctx, query, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
